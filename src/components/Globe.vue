@@ -108,6 +108,6 @@ const dots = computed(() => {
         FRANKFURT<small>DAX 40 <b>↘</b></small>
       </div>
     </div>
-    <span class="globe-caption">GLOBAL BENCHMARKS / SYNTHETIC TESTNET</span>
+    <span class="globe-caption">GLOBAL BENCHMARKS / SYNTHETIC MAINNET DEMO</span>
   </div>
 </template>

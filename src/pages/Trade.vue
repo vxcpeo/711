@@ -58,7 +58,10 @@ const now = ref(Date.now()),
   failed = ref(false)
 const rpcRequest = new FetchRequest(config.network.rpcUrl)
 rpcRequest.timeout = 15000
-const rpc = new JsonRpcProvider(rpcRequest, 46630, { staticNetwork: true, batchMaxCount: 10 })
+const rpc = new JsonRpcProvider(rpcRequest, config.network.chainId, {
+  staticNetwork: true,
+  batchMaxCount: 10,
+})
 const tokenRead = new Contract(config.addresses.demoUSD, config.abi.demoUSD, rpc),
   marketRead = new Contract(config.addresses.indexPerpSandbox, config.abi.indexPerpSandbox, rpc)
 const quote = computed(() =>
@@ -93,7 +96,7 @@ const canOpen = computed(
     liquidity.value >= parseUnits(String(margin.value || 0), 6),
 )
 const blockedReason = computed(() => {
-  if (!accepted.value) return 'Accept the testnet model to continue.'
+  if (!accepted.value) return 'Accept the demo model to continue.'
   if (stale.value) return 'New orders are unavailable until the operator publishes a fresh quote.'
   if (paused.value) return 'New risk is paused.'
   if (!marginValid.value) return 'Check the margin amount.'
@@ -175,7 +178,7 @@ async function refresh() {
   } catch (e) {
     if (serial === refreshSerial)
       readError.value =
-        'The testnet RPC is unavailable. Chain values could not be refreshed. Try again in a moment.'
+        'The public RPC is unavailable. Chain values could not be refreshed. Try again in a moment.'
   } finally {
     if (serial === refreshSerial) loading.value = false
   }
@@ -202,7 +205,7 @@ function explain(e) {
       'The operator demo price is stale. Wait for a fresh quote before opening or closing.',
     FaucetCooldown: 'The faucet can be claimed once every 24 hours per wallet.',
     InsufficientBalance: 'Insufficient available dUSD. Deposit collateral first.',
-    InsufficientLiquidity: 'The test liquidity reserve is insufficient for this position.',
+    InsufficientLiquidity: 'The demo liquidity reserve is insufficient for this position.',
     SlippageExceeded: 'The demo quote moved beyond the 0.5% limit. Refresh and try again.',
     EnforcedPause:
       'New risk is temporarily paused. Withdrawals and supported exits remain available.',
@@ -210,7 +213,7 @@ function explain(e) {
   }
   if (messages[errorName]) return messages[errorName]
   if (e.code === 'INSUFFICIENT_FUNDS')
-    return 'You need test ETH to pay gas. Use the official faucet linked below.'
+    return 'You need ETH on Robinhood Chain to pay gas. Bridge ETH to chain 4663 first.'
   return (
     e.shortMessage ||
     e.message ||
@@ -230,7 +233,7 @@ async function run(label, operation) {
   const account = address.value
   try {
     if (!(await switchNetwork()))
-      throw Error('Switch to Robinhood Chain Testnet before continuing.')
+      throw Error(`Switch to ${config.network.name} before continuing.`)
     const signer = await provider.value.getSigner()
     if ((await signer.getAddress()).toLowerCase() !== account.toLowerCase())
       throw Error('Wallet account changed. Review the action and try again.')
@@ -242,17 +245,17 @@ async function run(label, operation) {
       )
     const send = async (contract, method, args = []) => {
       const currentChain = Number((await provider.value.getNetwork()).chainId)
-      if (currentChain !== 46630)
+      if (currentChain !== config.network.chainId)
         throw Error(
-          'The wallet network changed. Return to Robinhood Chain Testnet and review the action.',
+          `The wallet network changed. Return to ${config.network.name} and review the action.`,
         )
       const currentSigner = await provider.value.getSigner()
       if ((await currentSigner.getAddress()).toLowerCase() !== account.toLowerCase())
         throw Error('Wallet account changed. Review the action and try again.')
-      return contract.connect(currentSigner)[method](...args, { chainId: 46630 })
+      return contract.connect(currentSigner)[method](...args, { chainId: config.network.chainId })
     }
     await operation({ token, exchange, account, send })
-    message.value = 'Transaction confirmed on Robinhood Chain Testnet.'
+    message.value = `Transaction confirmed on ${config.network.name}.`
   } catch (e) {
     failed.value = true
     message.value = explain(e)
@@ -263,7 +266,7 @@ async function run(label, operation) {
 }
 async function confirm(tx) {
   txHash.value = tx.hash
-  message.value = 'Transaction submitted. Waiting for testnet confirmation…'
+  message.value = 'Transaction submitted. Waiting for mainnet confirmation…'
   await tx.wait()
 }
 function claim() {
@@ -280,7 +283,7 @@ function deposit() {
   const quantity = parseUnits(String(amount.value), 6)
   run('Preparing your deposit…', async ({ token, exchange, account, send }) => {
     if ((await tokenRead.balanceOf(account)) < quantity)
-      throw Error('Your wallet does not have enough dUSD. Claim free test tokens first.')
+      throw Error('Your wallet does not have enough dUSD. Claim free demo tokens first.')
     if ((await tokenRead.allowance(account, config.addresses.indexPerpSandbox)) < quantity) {
       message.value = 'Approve this exact dUSD amount in your wallet.'
       await confirm(await send(token, 'approve', [config.addresses.indexPerpSandbox, quantity]))
@@ -379,20 +382,20 @@ onUnmounted(() => {
           </p>
         </div>
         <div class="overture-tools">
-          <span class="net-flag"><i></i>ROBINHOOD TESTNET</span>
+          <span class="net-flag"><i></i>ROBINHOOD MAINNET</span>
         </div>
       </div>
     </section>
 
     <p class="notice-strip">
       <Info :size="16" /><span
-        >Experimental testnet. dUSD has no cash value. PnL is capped at ±100% of margin.
+        >Experimental mainnet demo. dUSD has no cash value. PnL is capped at ±100% of margin.
         <RouterLink to="/learn#risk">Understand the model ↗</RouterLink></span
       >
     </p>
-    <p v-if="address && chainId !== 46630" class="notice-strip warn">
+    <p v-if="address && chainId !== config.network.chainId" class="notice-strip warn">
       Your wallet is connected to a different network.<button :disabled="busy" @click="changeChain">
-        Switch to Robinhood Chain Testnet
+        Switch to {{ config.network.name }}
       </button>
     </p>
     <p v-if="readError" class="notice-strip warn" role="alert">
@@ -484,7 +487,7 @@ onUnmounted(() => {
           {{
             quote
               ? `Last published ${Math.floor(quoteAge / 60)} min ago. Prices expire after 15 minutes.`
-              : 'Reading the public testnet…'
+              : 'Reading the public RPC…'
           }}
           {{ paused ? 'New positions and deposits are paused.' : '' }}
         </p>
@@ -535,7 +538,7 @@ onUnmounted(() => {
     <section class="ticket-strip" aria-labelledby="ticket-title">
       <div class="ticket-head">
         <h2 id="ticket-title" class="shout-mid">Express your view.</h2>
-        <p>Isolated margin · max 20× · test tokens only</p>
+        <p>Isolated margin · max 20× · demo tokens only</p>
       </div>
       <div class="ticket-grid">
         <section class="ticket-col">
@@ -604,7 +607,7 @@ onUnmounted(() => {
         <section class="ticket-col">
           <label class="terms"
             ><input type="checkbox" v-model="accepted" />I understand these are synthetic prices and
-            worthless test tokens, with capped PnL.</label
+            worthless demo tokens, with capped PnL.</label
           ><button
             class="cta cta-solid ticket-cta"
             :disabled="busy || (!!address && !canOpen)"
@@ -616,8 +619,7 @@ onUnmounted(() => {
             ><ArrowUpRight v-if="!busy" :size="16" />
           </button>
           <p class="risk-line">
-            ¹ At 90% margin loss. Execution requires fresh quotes. Gas is paid separately in test
-            ETH.
+            ¹ At 90% margin loss. Execution requires fresh quotes. Gas is paid separately in ETH.
           </p>
           <p v-if="address && !busy && !canOpen" class="hint">{{ blockedReason }}</p>
         </section>
@@ -643,7 +645,7 @@ onUnmounted(() => {
 
     <section class="folio">
       <div class="folio-head">
-        <h2 class="shout-sm">Your testnet portfolio</h2>
+        <h2 class="shout-sm">Your mainnet portfolio</h2>
         <button @click="refresh" :disabled="loading || busy">
           <RefreshCw :size="13" :class="{ busy: loading }" />Refresh
         </button>
@@ -665,7 +667,7 @@ onUnmounted(() => {
       </ul>
       <div class="collateral-strip">
         <button class="cta cta-ghost" :disabled="busy || !!cooldownText" @click="claim">
-          {{ cooldownText ? `Faucet in ${cooldownText}` : 'Claim 10,000 dUSD' }}
+          {{ cooldownText ? `Faucet in ${cooldownText}` : 'Claim 10,000 demo dUSD' }}
         </button>
         <div class="amount-box">
           <input
@@ -683,8 +685,14 @@ onUnmounted(() => {
           Deposit</button
         ><button class="cta cta-ghost" :disabled="busy || !validAmount(amount)" @click="withdraw">
           Withdraw</button
-        ><a :href="config.network.faucetUrl" target="_blank" rel="noopener noreferrer"
+        ><a
+          v-if="config.network.faucetUrl"
+          :href="config.network.faucetUrl"
+          target="_blank"
+          rel="noopener noreferrer"
           >Need test ETH? Official faucet ↗</a
+        ><a v-else :href="config.network.bridgeUrl" target="_blank" rel="noopener noreferrer"
+          >Need ETH for gas? Bridge to chain {{ config.network.chainId }} ↗</a
         >
       </div>
       <section class="positions-block">
@@ -701,7 +709,7 @@ onUnmounted(() => {
           <p>
             {{
               address
-                ? 'Deposit test collateral, then open your first long or short position.'
+                ? 'Deposit demo collateral, then open your first long or short position.'
                 : 'Connect, claim free test tokens, and explore a global benchmark.'
             }}
           </p>
@@ -751,8 +759,8 @@ onUnmounted(() => {
         rel="noopener noreferrer"
         >dUSD token <ArrowUpRight :size="12" /></a
       ><span
-        >Chain ID 46630 · Contract state polled every 30 seconds; operator publishes demo
-        quotes</span
+        >Chain ID {{ config.network.chainId }} · Contract state polled every 30 seconds; operator
+        publishes demo quotes</span
       >
     </p>
     </div>

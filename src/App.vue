@@ -66,7 +66,7 @@ async function verify() {
     <div class="mast-bar">
       <RouterLink to="/" aria-label="Leverix home" class="lockup-link"><Brand /></RouterLink>
       <div class="mast-actions">
-        <span class="net-flag"><i></i> RH TESTNET</span>
+        <span class="net-flag"><i></i> RH MAINNET</span>
         <a
           class="x-link"
           :href="X_URL"
@@ -102,7 +102,7 @@ async function verify() {
     <div class="colophon-inner">
       <div class="colophon-brand">
         <RouterLink to="/" aria-label="Leverix home"><Brand /></RouterLink>
-        <p>Wallet-first index markets on Robinhood Chain testnet.</p>
+        <p>Synthetic demo index markets on Robinhood Chain mainnet.</p>
       </div>
       <div class="colophon-links">
         <RouterLink to="/learn">Documentation <ArrowUpRight :size="14" /></RouterLink
@@ -116,7 +116,7 @@ async function verify() {
       <div class="colophon-base">
         <span>© {{ new Date().getFullYear() }} Leverix · {{ SITE_LABEL }}</span
         ><span>Independent project. Not affiliated with Robinhood.</span
-        ><RouterLink to="/learn#risk">Testnet & risk disclosure</RouterLink>
+        ><RouterLink to="/learn#risk">Mainnet demo & risk disclosure</RouterLink>
       </div>
     </div>
   </div>
@@ -147,7 +147,7 @@ async function verify() {
         <p v-if="authError" role="alert" class="fail">{{ authError }}</p>
         <button class="cta cta-ghost" @click="disconnect">Disconnect</button></template
       ><template v-else
-        ><p>Choose an installed Ethereum wallet to explore the Robinhood Chain testnet.</p>
+        ><p>Choose an installed Ethereum wallet to explore the Robinhood Chain mainnet demo.</p>
         <button
           v-for="p in providers"
           :key="p.info.uuid"

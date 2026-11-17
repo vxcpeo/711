@@ -1,21 +1,21 @@
 {
   "network": {
-    "name": "Robinhood Chain Testnet",
-    "chainId": 46630,
-    "chainIdHex": "0xb626",
-    "rpcUrl": "https://rpc.testnet.chain.robinhood.com",
-    "explorerUrl": "https://explorer.testnet.chain.robinhood.com",
+    "name": "Robinhood Chain",
+    "chainId": 4663,
+    "chainIdHex": "0x1237",
+    "rpcUrl": "https://rpc.mainnet.chain.robinhood.com",
+    "explorerUrl": "https://robinhoodchain.blockscout.com",
     "nativeCurrency": {
       "name": "Ether",
       "symbol": "ETH",
       "decimals": 18
     },
     "documentation": "https://docs.robinhood.com/chain/connecting",
-    "faucetUrl": "https://faucet.testnet.chain.robinhood.com"
+    "bridgeUrl": "https://portal.arbitrum.io/bridge?destinationChain=robinhood-chain&sourceChain=ethereum"
   },
   "addresses": {
-    "demoUSD": "0x6bfcF1343F7c1631cb5aD61513ae07Ab09f2F1ea",
-    "indexPerpSandbox": "0xaa790F4610a38e925f19fB054E2ADf68cD8de38d"
+    "demoUSD": "0x7F7C7596D9Cc8D5A6818C0F6c4A1F2B28A200b63",
+    "indexPerpSandbox": "0x225f40A78E706e05e1e66d4939b4AbCC6f918EaE"
   },
   "abi": {
     "demoUSD": [
@@ -1828,11 +1828,11 @@
   "maxLeverage": 20,
   "deployment": {
     "version": 2,
-    "status": "deployed-testnet",
-    "deployedAt": "2026-09-18T09:50:35.633Z",
+    "status": "deployed-mainnet",
+    "deployedAt": "2026-11-17T09:39:34.508Z",
     "explorerUrls": {
-      "demoUSD": "https://explorer.testnet.chain.robinhood.com/address/0x6bfcF1343F7c1631cb5aD61513ae07Ab09f2F1ea",
-      "indexPerpSandbox": "https://explorer.testnet.chain.robinhood.com/address/0xaa790F4610a38e925f19fB054E2ADf68cD8de38d"
+      "demoUSD": "https://robinhoodchain.blockscout.com/address/0x7F7C7596D9Cc8D5A6818C0F6c4A1F2B28A200b63",
+      "indexPerpSandbox": "https://robinhoodchain.blockscout.com/address/0x225f40A78E706e05e1e66d4939b4AbCC6f918EaE"
     }
   }
 }

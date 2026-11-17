@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Activity, ArrowUpRight, Search, ShieldCheck, WalletCards, Zap } from 'lucide-vue-next'
 import { address, chainId, showWallet } from '../composables/wallet'
 import { markets, featured, format, spark } from '../markets'
+import config from '../deployment.json'
 
 const region = ref('All markets')
 const query = ref('')
@@ -20,10 +21,10 @@ const walletLabel = computed(() =>
   address.value ? `${address.value.slice(0, 6)}…${address.value.slice(-4)}` : 'Connect wallet',
 )
 const networkLabel = computed(() =>
-  chainId.value === 46630
-    ? 'Testnet connected'
+  chainId.value === config.network.chainId
+    ? 'Mainnet connected'
     : address.value
-      ? 'Switch to testnet'
+      ? 'Switch to mainnet'
       : 'Wallet not connected',
 )
 </script>
@@ -35,7 +36,7 @@ const networkLabel = computed(() =>
         <p class="tag">Leverix / MARKETS</p>
         <h1 class="shout">Trade the market view.</h1>
         <p class="standfirst">
-          A compact wallet terminal for synthetic benchmark markets on Robinhood Chain testnet.
+          A compact wallet terminal for synthetic benchmark markets on Robinhood Chain mainnet.
         </p>
       </div>
       <div class="overture-tools">
@@ -56,7 +57,7 @@ const networkLabel = computed(() =>
           {{
             address
               ? 'Your wallet is the signing surface. Review every transaction before approval.'
-              : 'Connect an injected EVM wallet to claim dUSD and open a test position.'
+              : 'Connect an injected EVM wallet to claim demo dUSD and open a test position.'
           }}
         </p>
         <button class="cta cta-ghost" @click="showWallet">
@@ -64,8 +65,8 @@ const networkLabel = computed(() =>
         </button>
         <dl class="chain-row">
           <dt>CHAIN</dt>
-          <dd>46630</dd>
-          <dd><small>Robinhood Chain Testnet</small></dd>
+          <dd>{{ config.network.chainId }}</dd>
+          <dd><small>{{ config.network.name }}</small></dd>
         </dl>
       </div>
     </li>
@@ -121,7 +122,7 @@ const networkLabel = computed(() =>
             <b>01</b><span>Connect a wallet<small>Injected EVM provider</small></span>
           </li>
           <li>
-            <b>02</b><span>Claim dUSD<small>Worthless test collateral</small></span>
+            <b>02</b><span>Claim dUSD<small>Worthless demo collateral</small></span>
           </li>
           <li>
             <b>03</b><span>Preview and sign<small>Isolated 1–20x demo margin</small></span>
@@ -200,7 +201,7 @@ const networkLabel = computed(() =>
       No markets match that search. Try a symbol such as DAX or JCI.
     </p>
     <p class="disclosure">
-      Testnet only · synthetic prices · no real money · independent project
+      Mainnet demo · synthetic prices · no real money · independent project
     </p>
   </section>
 

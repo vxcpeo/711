@@ -10,7 +10,7 @@ const router = createRouter({
     {
       path: '/trade',
       component: () => import('./pages/Trade.vue'),
-      meta: { title: 'Global markets · Testnet terminal — Leverix' },
+      meta: { title: 'Global markets · Mainnet demo — Leverix' },
     },
     {
       path: '/learn',

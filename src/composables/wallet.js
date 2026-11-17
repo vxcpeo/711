@@ -1,5 +1,6 @@
 import { ref, shallowRef } from 'vue'
 import { BrowserProvider, verifyMessage } from 'ethers'
+import config from '../deployment.json'
 export const address = ref(''),
   chainId = ref(0),
   walletOpen = ref(false),
@@ -9,11 +10,11 @@ export const address = ref(''),
 export const providers = shallowRef([]),
   provider = shallowRef(null)
 export const CHAIN = {
-  chainId: '0xb626',
-  chainName: 'Robinhood Chain Testnet',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: ['https://rpc.testnet.chain.robinhood.com'],
-  blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com'],
+  chainId: `0x${config.network.chainId.toString(16)}`,
+  chainName: config.network.name,
+  nativeCurrency: config.network.nativeCurrency,
+  rpcUrls: [config.network.rpcUrl],
+  blockExplorerUrls: [config.network.explorerUrl],
 }
 let active,
   listening = false
@@ -92,7 +93,7 @@ export async function switchNetwork() {
   }
   chainId.value = parseInt(await active.request({ method: 'eth_chainId' }), 16)
   provider.value = new BrowserProvider(active, 'any')
-  return chainId.value === 46630
+  return chainId.value === config.network.chainId
 }
 export async function signIn() {
   if (!provider.value) throw Error('Connect a wallet first.')
